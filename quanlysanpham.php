@@ -8,71 +8,71 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] != 3) {
     exit();
 }
 
-// Xử lý thêm sản phẩm
-// Xử lý thêm sản phẩm
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_product'])) {
-    // Lấy dữ liệu từ form
-    $ten_san_pham = $_POST['ten_san_pham'];
-    $gia = $_POST['gia'];
-    $mo_ta = $_POST['mo_ta'];
-    $so_luong = $_POST['so_luong'];
-    $hang_id = $_POST['hang_id'];
-    $cpu = $_POST['cpu'];
-    $ram = $_POST['ram'];
-    $o_cung = $_POST['o_cung'];
-    $gpu = $_POST['gpu'];
-    $kich_thuoc_manh_hinh = $_POST['kich_thuoc_manh_hinh'];
-    $thong_tin_mang_hinh = $_POST['thong_tin_mang_hinh'];
-    $pin = $_POST['pin'];
-    $he_dieu_hanh = $_POST['he_dieu_hanh'];
-    $trong_luong = $_POST['trong_luong'];
+// // Xử lý thêm sản phẩm
+// // Xử lý thêm sản phẩm
+// if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_product'])) {
+//     // Lấy dữ liệu từ form
+//     $ten_san_pham = $_POST['ten_san_pham'];
+//     $gia = $_POST['gia'];
+//     $mo_ta = $_POST['mo_ta'];
+//     $so_luong = $_POST['so_luong'];
+//     $hang_id = $_POST['hang_id'];
+//     $cpu = $_POST['cpu'];
+//     $ram = $_POST['ram'];
+//     $o_cung = $_POST['o_cung'];
+//     $gpu = $_POST['gpu'];
+//     $kich_thuoc_manh_hinh = $_POST['kich_thuoc_manh_hinh'];
+//     $thong_tin_mang_hinh = $_POST['thong_tin_mang_hinh'];
+//     $pin = $_POST['pin'];
+//     $he_dieu_hanh = $_POST['he_dieu_hanh'];
+//     $trong_luong = $_POST['trong_luong'];
 
-    // Thêm sản phẩm vào bảng sanpham
-    $sql = "INSERT INTO sanpham (ten_san_pham, gia, mo_ta, so_luong, hang_id, cpu, ram, o_cung, gpu, kich_thuoc_manh_hinh, thong_tin_mang_hinh, pin, he_dieu_hanh, trong_luong) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("sdsiisssssssss", $ten_san_pham, $gia, $mo_ta, $so_luong, $hang_id, $cpu, $ram, $o_cung, $gpu, $kich_thuoc_manh_hinh, $thong_tin_mang_hinh, $pin, $he_dieu_hanh, $trong_luong);
+//     // Thêm sản phẩm vào bảng sanpham
+//     $sql = "INSERT INTO sanpham (ten_san_pham, gia, mo_ta, so_luong, hang_id, cpu, ram, o_cung, gpu, kich_thuoc_manh_hinh, thong_tin_mang_hinh, pin, he_dieu_hanh, trong_luong) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+//     $stmt = $conn->prepare($sql);
+//     $stmt->bind_param("sdsiisssssssss", $ten_san_pham, $gia, $mo_ta, $so_luong, $hang_id, $cpu, $ram, $o_cung, $gpu, $kich_thuoc_manh_hinh, $thong_tin_mang_hinh, $pin, $he_dieu_hanh, $trong_luong);
 
-    if ($stmt->execute()) {
-        $sanpham_id = $stmt->insert_id;
+//     if ($stmt->execute()) {
+//         $sanpham_id = $stmt->insert_id;
 
-        // Xử lý upload nhiều ảnh
-        if (isset($_FILES['images']) && !empty($_FILES['images']['name'][0])) {
-            $upload_dir = "uploads/";
-            $allowed_types = array('jpg', 'jpeg', 'png', 'gif');
-            $max_file_size = 5 * 1024 * 1024; // 5MB
+//         // Xử lý upload nhiều ảnh
+//         if (isset($_FILES['images']) && !empty($_FILES['images']['name'][0])) {
+//             $upload_dir = "uploads/";
+//             $allowed_types = array('jpg', 'jpeg', 'png', 'gif');
+//             $max_file_size = 5 * 1024 * 1024; // 5MB
 
-            foreach ($_FILES['images']['tmp_name'] as $key => $tmp_name) {
-                $file_name = $_FILES['images']['name'][$key];
-                $file_size = $_FILES['images']['size'][$key];
-                $file_tmp = $_FILES['images']['tmp_name'][$key];
-                $file_type = $_FILES['images']['type'][$key];
+//             foreach ($_FILES['images']['tmp_name'] as $key => $tmp_name) {
+//                 $file_name = $_FILES['images']['name'][$key];
+//                 $file_size = $_FILES['images']['size'][$key];
+//                 $file_tmp = $_FILES['images']['tmp_name'][$key];
+//                 $file_type = $_FILES['images']['type'][$key];
 
-                // Kiểm tra loại file và kích thước
-                $file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
-                if (!in_array($file_ext, $allowed_types)) {
-                    $error_message = "Chỉ cho phép các file ảnh JPG, JPEG, PNG và GIF.";
-                    continue;
-                }
-                if ($file_size > $max_file_size) {
-                    $error_message = "File không được vượt quá 5MB.";
-                    continue;
-                }
+//                 // Kiểm tra loại file và kích thước
+//                 $file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
+//                 if (!in_array($file_ext, $allowed_types)) {
+//                     $error_message = "Chỉ cho phép các file ảnh JPG, JPEG, PNG và GIF.";
+//                     continue;
+//                 }
+//                 if ($file_size > $max_file_size) {
+//                     $error_message = "File không được vượt quá 5MB.";
+//                     continue;
+//                 }
 
-                // Tạo tên file mới để tránh trùng lặp
-                $new_file_name = uniqid() . '.' . $file_ext;
+//                 // Tạo tên file mới để tránh trùng lặp
+//                 $new_file_name = uniqid() . '.' . $file_ext;
 
-                // Di chuyển file tạm vào thư mục uploads
-                move_uploaded_file($file_tmp, $upload_dir . $new_file_name);
+//                 // Di chuyển file tạm vào thư mục uploads
+//                 move_uploaded_file($file_tmp, $upload_dir . $new_file_name);
 
-                // Thêm ảnh vào bảng anh_sanpham
-                $sql = "INSERT INTO anh_sanpham (sanpham_id, anh) VALUES (?, ?)";
-                $stmt = $conn->prepare($sql);
-                $stmt->bind_param("is", $sanpham_id, $new_file_name);
-                $stmt->execute();
-            }
-        }
-    }
-}
+//                 // Thêm ảnh vào bảng anh_sanpham
+//                 $sql = "INSERT INTO anh_sanpham (sanpham_id, anh) VALUES (?, ?)";
+//                 $stmt = $conn->prepare($sql);
+//                 $stmt->bind_param("is", $sanpham_id, $new_file_name);
+//                 $stmt->execute();
+//             }
+//         }
+//     }
+// }
 
 // Xử lý xóa sản phẩm
 if (isset($_GET['delete'])) {
@@ -187,7 +187,7 @@ error_reporting(E_ALL);
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form id="addProductForm" action="quanlysanpham.php" method="post" enctype="multipart/form-data">
+                    <form action="themsanpham.php" method="post" enctype="multipart/form-data">
                         <div class="form-group">
                             <label for="ten_san_pham">Tên sản phẩm</label>
                             <input type="text" class="form-control" id="ten_san_pham" name="ten_san_pham" required>
@@ -201,6 +201,10 @@ error_reporting(E_ALL);
                                 }
                                 ?>
                             </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="gia">Giá</label>
+                            <input type="number" class="form-control" id="gia" name="gia" required>
                         </div>
                         <div class="form-group">
                             <label for="cpu">CPU</label>
@@ -240,10 +244,7 @@ error_reporting(E_ALL);
                             <label for="trong_luong">Trọng lượng</label>
                             <input type="text" class="form-control" id="trong_luong" name="trong_luong" required>
                         </div>
-                        <div class="form-group">
-                            <label for="gia">Giá</label>
-                            <input type="number" class="form-control" id="gia" name="gia" required>
-                        </div>
+
                         <div class="form-group">
                             <label for="mo_ta">Mô tả</label>
                             <textarea class="form-control" id="mo_ta" name="mo_ta" required></textarea>
@@ -255,6 +256,11 @@ error_reporting(E_ALL);
                         <div class="form-group">
                             <label for="product_image">Ảnh sản phẩm</label>
                             <input type="file" id="product_images" name="images[]" multiple accept="image/*">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="main_image">Ảnh đại diện sản phẩm</label>
+                            <input type="file" id="main_image" name="main_image_file" accept="image/*" required>
                         </div>
                         <button type="submit" name="add_product" class="btn btn-primary">Thêm sản phẩm</button>
                     </form>

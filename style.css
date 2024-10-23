@@ -263,6 +263,20 @@ body {
     font-size: 18px;
 }
 
+.banner-buttons button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    font-size: 24px;
+}
+.banner-buttons #nextBtn {
+    right: 10px;
+}
 .banner-buttons button:hover {
     background-color: rgba(0, 0, 0, 0.7);
 }
@@ -401,46 +415,71 @@ body {
     border: 1px solid #ccc;
 }
 
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 2rem;
+    font-weight: 700;
+}
+
 .product-list {
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
+    justify-content: center;
 }
 
 .product-item {
-    background-color: white;
-    padding: 15px;
-    border-radius: 10px;
+    background-color: #fff;
+    border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    width: 300px;
     text-align: center;
-    transition: transform 0.2s;
-    width: calc(25% - 20px);
+    transition: transform 0.3s ease;
 }
 
 .product-item:hover {
-    transform: scale(1.05);
+    transform: translateY(-10px);
 }
 
-.product-item img {
-    border-radius: 10px;
-    margin-bottom: 15px;
+.product-image img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
 }
 
-.product-info h3 {
-    font-size: 18px;
-    margin-bottom: 10px;
+.product-info {
+    padding: 15px;
+}
+
+.product-name {
+    font-size: 1.2rem;
+    font-weight: 600;
     color: #333;
+    margin-bottom: 10px;
+    overflow-wrap: break-word;
+    /* Đảm bảo tên sản phẩm không bị tràn */
 }
 
-.product-info .price {
-    color: #4CAF50;
-    font-size: 16px;
+.price {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #E53935;
 }
 
-.product-info .old-price {
-    color: #888;
-    text-decoration: line-through;
-    margin-left: 10px;
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .product-list {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        /* Giảm kích thước cho màn hình nhỏ */
+    }
 }
 
 .footer {

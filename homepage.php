@@ -4,11 +4,12 @@ include 'config.php';
 $is_logged_in = isset($_SESSION['user_id']);
 $isAdmin = $is_logged_in && $_SESSION['user_role'] == 3; // Sửa dòng này
 $user_name = $is_logged_in ? $_SESSION['user_email'] : '';
-$sql = "SELECT s.id, s.ten_san_pham, s.gia, a.anh 
-        FROM sanpham s 
-        LEFT JOIN anh_sanpham a ON s.id = a.sanpham_id 
-        WHERE a.is_main = 1 OR a.is_main IS NULL
-        LIMIT 8";
+$sql = "SELECT sanpham.id, sanpham.ten_san_pham, sanpham.gia, anh_sanpham.anh 
+        FROM sanpham 
+        LEFT JOIN anh_sanpham 
+        ON sanpham.id = anh_sanpham.sanpham_id 
+        WHERE anh_sanpham.is_main = 1"; // Chỉ lấy ảnh đại diện
+
 $result = $conn->query($sql);
 ?>
 <html>
@@ -18,233 +19,7 @@ $result = $conn->query($sql);
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&amp;display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="style.css">
-    <style>
-        /* Reset mặc định */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
 
-        /* Cài đặt font chung */
-        body {
-            font-family: 'Roboto', sans-serif;
-            background-color: #f7f7f7;
-            color: #333;
-        }
-
-        .container {
-            width: 90%;
-            margin: 0 auto;
-        }
-
-        /* Header */
-        .header {
-            background-color: ;
-            padding: 20px 0;
-            color: white;
-        }
-
-        .logo-section {
-            display: flex;
-            align-items: center;
-        }
-
-        .logo-section i {
-            font-size: 40px;
-            margin-right: 10px;
-        }
-
-        .brand-info h1 {
-            font-size: 28px;
-            margin-bottom: 5px;
-        }
-
-        .brand-info p {
-            font-size: 14px;
-        }
-
-        .search-bar {
-            margin-top: 20px;
-            display: flex;
-        }
-
-        .search-bar input {
-            padding: 10px;
-            width: 300px;
-            border: none;
-            border-radius: 5px;
-        }
-
-        .search-bar button {
-            padding: 10px 15px;
-            border: none;
-            background-color: #333;
-            color: white;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-
-        .search-bar button:hover {
-            background-color: #555;
-        }
-
-        .contact-info {
-            margin-top: 10px;
-            font-size: 16px;
-        }
-
-
-        /* Main Banner */
-        .main-banner {
-            position: relative;
-        }
-
-        .banner-image {
-            width: 100%;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .banner-buttons button {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background-color: rgba(0, 0, 0, 0.5);
-            color: white;
-            border: none;
-            padding: 10px;
-            cursor: pointer;
-            font-size: 24px;
-        }
-
-        .banner-buttons #prevBtn {
-            left: 10px;
-        }
-
-        .banner-buttons #nextBtn {
-            right: 10px;
-        }
-
-        .banner-buttons button:hover {
-            background-color: rgba(0, 0, 0, 0.7);
-        }
-
-        /* Product Section */
-        .product-section {
-            padding: 40px 0;
-        }
-
-        .filter-bar {
-            background-color: #f1f1f1;
-            padding: 10px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-
-        .filter-bar label {
-            font-weight: bold;
-        }
-
-        .filter-bar select {
-            padding: 8px;
-            margin-left: 10px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-        }
-
-        .product-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-
-        .product-item {
-            background-color: white;
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            transition: transform 0.2s;
-            width: calc(25% - 20px);
-        }
-
-        .product-item:hover {
-            transform: scale(1.05);
-        }
-
-        .product-item img {
-            border-radius: 10px;
-            margin-bottom: 15px;
-        }
-
-        .product-info h3 {
-            font-size: 18px;
-            margin-bottom: 10px;
-            color: #333;
-        }
-
-        .product-info .price {
-            color: #4CAF50;
-            font-size: 16px;
-        }
-
-        .product-info .old-price {
-            color: #888;
-            text-decoration: line-through;
-            margin-left: 10px;
-        }
-
-        /* Footer */
-        .footer {
-            background-color: #333;
-            color: white;
-            padding: 40px 0;
-            margin-top: 40px;
-        }
-
-        .footer-info {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 30px;
-        }
-
-        .footer-info h3 {
-            margin-bottom: 15px;
-        }
-
-        .footer-info ul {
-            list-style-type: none;
-        }
-
-        .footer-info ul li {
-            margin-bottom: 10px;
-        }
-
-        .footer-info ul li a {
-            color: white;
-            text-decoration: none;
-        }
-
-        .footer-info ul li a:hover {
-            color: #4CAF50;
-        }
-
-        .social-icons {
-            text-align: center;
-        }
-
-        .social-icons a {
-            color: white;
-            font-size: 20px;
-            margin: 0 10px;
-            text-decoration: none;
-        }
-
-        .social-icons a:hover {
-            color: #4CAF50;
-        }
-    </style>
 </head>
 
 <body>
@@ -380,22 +155,29 @@ $result = $conn->query($sql);
         </div>
     </div>
     <div class="container">
-        <h2> Các Sản Phẩm </h2>
+        <h2>Các Sản Phẩm</h2>
         <div class="product-list">
             <?php
             if ($result->num_rows > 0) {
                 while ($row = $result->fetch_assoc()) {
                     echo '<div class="product-item">';
-                    if (!empty($row["anh"])) {
-                        echo '<img alt="' . htmlspecialchars($row["ten_san_pham"]) . '" src="' . htmlspecialchars($row["anh"]) . '" width="250" height="150" />';
-                    } else {
-                        echo '<img alt="No Image" src="placeholder_image.jpg" width="250" height="150" />';
-                    }
+
+                    // Hiển thị ảnh sản phẩm (ảnh đại diện)
+                    echo '<div class="product-image">';
+                    echo '<img alt="Ảnh sản phẩm ' . htmlspecialchars($row["ten_san_pham"]) . '" src="uploads/' . htmlspecialchars($row["anh"]) . '" />';
+                    echo '</div>';
+
+                    // Thông tin sản phẩm
                     echo '<div class="product-info">';
-                    echo '<h3>' . htmlspecialchars($row["ten_san_pham"]) . '</h3>';
+
+                    // Tên sản phẩm (hiển thị đầy đủ)
+                    echo '<h3 class="product-name">' . htmlspecialchars($row["ten_san_pham"]) . '</h3>';
+
+                    // Giá sản phẩm
                     echo '<div class="price">' . number_format($row["gia"], 0, ',', '.') . ' VND</div>';
-                    echo '</div>';
-                    echo '</div>';
+
+                    echo '</div>'; // Kết thúc product-info
+                    echo '</div>'; // Kết thúc product-item
                 }
             } else {
                 echo "Không có sản phẩm nào.";
@@ -403,6 +185,10 @@ $result = $conn->query($sql);
             ?>
         </div>
     </div>
+
+
+
+
     </div>
     <footer class="footer">
         <div class="container">
