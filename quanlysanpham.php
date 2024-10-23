@@ -271,6 +271,110 @@ error_reporting(E_ALL);
             </div>
         </div>
     </div>
+    <!-- Modal sửa sản phẩm -->
+    <div class="modal fade" id="editProductModal" tabindex="-1" role="dialog" aria-labelledby="editProductModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editProductModalLabel">Sửa sản phẩm</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="editProductForm">
+                        <input type="hidden" id="edit_product_id" name="product_id">
+
+                        <div class="form-group">
+                            <label for="edit_ten_san_pham">Tên sản phẩm</label>
+                            <input type="text" class="form-control" id="edit_ten_san_pham" name="ten_san_pham" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="edit_hang_id">Hãng</label>
+                            <select class="form-control" id="edit_hang_id" name="hang_id" required>
+                                <?php
+                                if ($result_hang->num_rows > 0) {
+                                    while ($row_hang = $result_hang->fetch_assoc()) {
+                                        // Kiểm tra nếu đây là hãng đã được chọn
+                                        $selected = ($row_hang['id'] == $sanpham['hang_id']) ? 'selected' : '';
+                                        echo "<option value='" . $row_hang['id'] . "' $selected>" . $row_hang['ten_hang'] . "</option>";
+                                    }
+                                } else {
+                                    echo "<option value=''>Không có hãng nào</option>";
+                                }
+                                ?>
+                            </select>
+
+
+                        </div>
+
+                        <div class="form-group">
+                            <label for="edit_gia">Giá</label>
+                            <input type="number" class="form-control" id="edit_gia" name="gia" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="edit_cpu">CPU</label>
+                            <input type="text" class="form-control" id="edit_cpu" name="cpu" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="edit_ram">RAM</label>
+                            <input type="text" class="form-control" id="edit_ram" name="ram" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="edit_o_cung">Ổ cứng</label>
+                            <input type="text" class="form-control" id="edit_o_cung" name="o_cung" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="edit_gpu">GPU</label>
+                            <input type="text" class="form-control" id="edit_gpu" name="gpu" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="edit_kich_thuoc_manh_hinh">Kích thước màn hình</label>
+                            <input type="text" class="form-control" id="edit_kich_thuoc_manh_hinh"
+                                name="kich_thuoc_manh_hinh" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="edit_thong_tin_mang_hinh">Thông tin màn hình</label>
+                            <input type="text" class="form-control" id="edit_thong_tin_mang_hinh"
+                                name="thong_tin_mang_hinh" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="edit_pin">Pin</label>
+                            <input type="text" class="form-control" id="edit_pin" name="pin" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="edit_he_dieu_hanh">Hệ điều hành</label>
+                            <input type="text" class="form-control" id="edit_he_dieu_hanh" name="he_dieu_hanh" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="edit_trong_luong">Trọng lượng</label>
+                            <input type="text" class="form-control" id="edit_trong_luong" name="trong_luong" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="edit_so_luong">Số lượng</label>
+                            <input type="number" class="form-control" id="edit_so_luong" name="so_luong" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Cập nhật sản phẩm</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
 
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
@@ -279,9 +383,59 @@ error_reporting(E_ALL);
             // Xử lý nút sửa
             $(".edit-btn").click(function () {
                 var id = $(this).data("id");
-                // Xử lý sửa sản phẩm
-                // ...
+
+                // Gửi yêu cầu lấy thông tin sản phẩm
+                $.ajax({
+                    type: "GET",
+                    url: "get_product.php",
+                    data: { id: id },
+                    success: function (data) {
+                        // Kiểm tra dữ liệu trả về từ máy chủ
+                        try {
+                            var sanpham = JSON.parse(data); // Phân tích chuỗi JSON thành đối tượng
+
+                            console.log(sanpham); // In toàn bộ sản phẩm để kiểm tra
+                            console.log("hang_id:", sanpham.hang_id); // Kiểm tra giá trị hang_id sau khi đã có đối tượng sanpham
+
+                            // Kiểm tra nếu sản phẩm có dữ liệu
+                            if (sanpham) {
+                                // Cập nhật các trường trong modal
+                                $("#edit_product_id").val(sanpham.id);
+                                $("#edit_ten_san_pham").val(sanpham.ten_san_pham);
+                                $("#edit_gia").val(sanpham.gia);
+                                $("#edit_mo_ta").val(sanpham.mo_ta);
+                                $("#edit_so_luong").val(sanpham.so_luong);
+                                $("#edit_cpu").val(sanpham.cpu);
+                                $("#edit_ram").val(sanpham.ram);
+                                $("#edit_o_cung").val(sanpham.o_cung);
+                                $("#edit_gpu").val(sanpham.gpu);
+                                $("#edit_kich_thuoc_manh_hinh").val(sanpham.kich_thuoc_manh_hinh);
+                                $("#edit_thong_tin_mang_hinh").val(sanpham.thong_tin_mang_hinh);
+                                $("#edit_pin").val(sanpham.pin);
+                                $("#edit_he_dieu_hanh").val(sanpham.he_dieu_hanh);
+                                $("#edit_trong_luong").val(sanpham.trong_luong);
+
+                                // Cập nhật giá trị cho dropdown hãng
+                                $("#edit_hang_id").val(sanpham.hang_id); // Sử dụng hang_id để chọn option
+
+                                // Hiển thị modal sửa sản phẩm
+                                $("#editProductModal").modal("show");
+                            } else {
+                                alert("Không tìm thấy sản phẩm.");
+                            }
+                        } catch (e) {
+                            console.error("Lỗi khi phân tích JSON:", e);
+                            alert("Đã xảy ra lỗi khi xử lý dữ liệu sản phẩm.");
+                        }
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        console.log("Lỗi:", textStatus, errorThrown);
+                        alert("Đã xảy ra lỗi khi lấy thông tin sản phẩm.");
+                    }
+                });
             });
+
+
 
             // Xử lý nút xóa
             $(".delete-btn").click(function () {
