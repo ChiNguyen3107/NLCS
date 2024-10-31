@@ -8,23 +8,23 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] != 3) {
     exit();
 }
 
-// Lấy thông tin sản phẩm
 if (isset($_GET['id'])) {
     $id = $_GET['id'];
-    // Thêm JOIN với bảng hang để lấy thông tin hãng
-    $sql = "SELECT s.*, h.ten_hang FROM sanpham s 
-            LEFT JOIN hang h ON s.hang_id = h.id 
-            WHERE s.id = ?";
+    $sql = "SELECT * FROM sanpham WHERE id = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $id);
     $stmt->execute();
     $result = $stmt->get_result();
 
     if ($result->num_rows > 0) {
-        $sanpham = $result->fetch_assoc();
-        echo json_encode($sanpham);
+        $product = $result->fetch_assoc();
+        echo json_encode($product);
     } else {
         echo json_encode([]);
     }
+} else {
+    echo json_encode([]);
 }
+
+$conn->close();
 ?>

@@ -43,9 +43,21 @@ $result = $conn->query($sql);
 
             </div>
             <div class="cart">
-                <a href="#" id="cart-icon">
+                <a href="cart.php" class="cart-icon">
                     <i class="fas fa-shopping-cart"></i>
-                    <span class="cart-count">0</span>
+                    <span class="cart-count">
+                        <?php
+                        $count = 0;
+                        if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
+                            foreach ($_SESSION['cart'] as $quantity) {
+                                if (is_numeric($quantity)) {
+                                    $count += (int) $quantity;
+                                }
+                            }
+                        }
+                        echo $count;
+                        ?>
+                    </span>
                 </a>
             </div>
             <div class="account">
@@ -108,54 +120,55 @@ $result = $conn->query($sql);
         </div>
     </div>
 
-    <div class="product-section">
-        <div class="filter-bar">
-            <div class="container">
-                <h3>Bộ lọc sản phẩm</h3>
-                <div class="filter-options">
-                    <select id="brand" name="brand">
-                        <option value="all">Thương hiệu</option>
-                        <option value="dell">Dell</option>
-                        <option value="hp">HP</option>
-                        <option value="lenovo">Lenovo</option>
-                        <option value="asus">Asus</option>
-                        <option value="acer">Acer</option>
-                    </select>
-                    <select id="price" name="price">
-                        <option value="all">Giá</option>
-                        <option value="0-10m">Dưới 10 triệu</option>
-                        <option value="10m-15m">10 - 15 triệu</option>
-                        <option value="15m-20m">15 - 20 triệu</option>
-                        <option value="20m+">Trên 20 triệu</option>
-                    </select>
-                    <select id="cpu" name="cpu">
-                        <option value="all">CPU</option>
-                        <option value="intel-i3">Intel Core i3</option>
-                        <option value="intel-i5">Intel Core i5</option>
-                        <option value="intel-i7">Intel Core i7</option>
-                        <option value="amd-ryzen">AMD Ryzen</option>
-                    </select>
-                    <select id="ram" name="ram">
-                        <option value="all">RAM</option>
-                        <option value="4gb">4GB</option>
-                        <option value="8gb">8GB</option>
-                        <option value="16gb">16GB</option>
-                        <option value="32gb">32GB</option>
-                    </select>
-                    <select id="storage" name="storage">
-                        <option value="all">Ổ cứng</option>
-                        <option value="ssd-256gb">SSD 256GB</option>
-                        <option value="ssd-512gb">SSD 512GB</option>
-                        <option value="ssd-1tb">SSD 1TB</option>
-                        <option value="hdd-1tb">HDD 1TB</option>
-                    </select>
-                    <button id="apply-filter" class="apply-filter-btn">Lọc</button>
-                </div>
+    <div class="filter-bar">
+        <div class="container">
+            <h3>Bộ lọc sản phẩm</h3>
+            <div class="filter-options">
+                <select id="brand" name="brand">
+                    <option value="all">Thương hiệu</option>
+                    <?php
+                    // Lấy danh sách hãng từ CSDL
+                    $sql_hang = "SELECT * FROM hang";
+                    $result_hang = $conn->query($sql_hang);
+                    while ($row_hang = $result_hang->fetch_assoc()) {
+                        echo "<option value='" . $row_hang['id'] . "'>" . $row_hang['ten_hang'] . "</option>";
+                    }
+                    ?>
+                </select>
+                <select id="price" name="price">
+                    <option value="all">Giá</option>
+                    <option value="0-10m">Dưới 10 triệu</option>
+                    <option value="10m-15m">10 - 15 triệu</option>
+                    <option value="15m-20m">15 - 20 triệu</option>
+                    <option value="20m+">Trên 20 triệu</option>
+                </select>
+                <select id="cpu" name="cpu">
+                    <option value="all">CPU</option>
+                    <option value="intel-i3">Intel Core i3</option>
+                    <option value="intel-i5">Intel Core i5</option>
+                    <option value="intel-i7">Intel Core i7</option>
+                    <option value="amd-ryzen">AMD Ryzen</option>
+                </select>
+                <select id="ram" name="ram">
+                    <option value="all">RAM</option>
+                    <option value="4gb">4GB</option>
+                    <option value="8gb">8GB</option>
+                    <option value="16gb">16GB</option>
+                    <option value="32gb">32GB</option>
+                </select>
+                <select id="storage" name="storage">
+                    <option value="all">Ổ cứng</option>
+                    <option value="ssd-256gb">SSD 256GB</option>
+                    <option value="ssd-512gb">SSD 512GB</option>
+                    <option value="ssd-1tb">SSD 1TB</option>
+                    <option value="hdd-1tb">HDD 1TB</option>
+                </select>
+                <button id="apply-filter" class="apply-filter-btn">Lọc</button>
+                <button id="reset-filter" class="reset-filter-btn">Đặt lại</button>
             </div>
         </div>
     </div>
     <div class="container">
-        <h2>Các Sản Phẩm</h2>
         <div class="product-list">
             <?php
             if ($result->num_rows > 0) {
@@ -175,9 +188,9 @@ $result = $conn->query($sql);
 
                     // Giá sản phẩm
                     echo '<div class="price">' . number_format($row["gia"], 0, ',', '.') . ' VND</div>';
-
-                    echo '</div>'; // Kết thúc product-info
-                    echo '</div>'; // Kết thúc product-item
+                    echo '<a href="chitiet_sanpham.php?id=' . $row['id'] . '">Xem chi tiết</a>';
+                    echo '</div>';
+                    echo '</div>';
                 }
             } else {
                 echo "Không có sản phẩm nào.";
@@ -229,6 +242,51 @@ $result = $conn->query($sql);
         </div>
     </footer>
     <script src="script.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Load sản phẩm khi trang được tải
+            loadProducts();
+            $('#reset-filter').click(function () {
+                // Reset tất cả các select box về giá trị mặc định
+                $('#brand, #price, #cpu, #ram, #storage').val('all');
+                // Load lại tất cả sản phẩm
+                loadProducts();
+            });
+
+            // Xử lý sự kiện khi nhấn nút lọc
+            $('#apply-filter').click(function () {
+                loadProducts();
+            });
+
+            function loadProducts() {
+                var brand = $('#brand').val();
+                var price = $('#price').val();
+                var cpu = $('#cpu').val();
+                var ram = $('#ram').val();
+                var storage = $('#storage').val();
+
+                $.ajax({
+                    url: 'loc_sanpham.php',
+                    type: 'GET',
+                    data: {
+                        brand: brand,
+                        price: price,
+                        cpu: cpu,
+                        ram: ram,
+                        storage: storage
+                    },
+                    success: function (response) {
+                        $('.product-list').html(response);
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error:', error);
+                        alert('Có lỗi xảy ra khi lọc sản phẩm');
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 
 </html>

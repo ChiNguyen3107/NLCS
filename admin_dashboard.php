@@ -12,20 +12,38 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] != 3) {
 $user_email = $_SESSION['user_email'];
 
 // Thực hiện các truy vấn để lấy thống kê
-$sql_products = "SELECT COUNT(*) as total FROM products";
+$sql_products = "SELECT COUNT(*) as total FROM sanpham";
 $sql_users = "SELECT COUNT(*) as total FROM users";
-$sql_orders = "SELECT COUNT(*) as total FROM orders";
-$sql_revenue = "SELECT SUM(total_amount) as total FROM orders";
+$sql_orders = "SELECT COUNT(*) as total FROM donhang";
+$sql_revenue = "SELECT SUM(tong_tien) as total FROM donhang WHERE trang_thai != 'cancelled'";
 
 $result_products = $conn->query($sql_products);
 $result_users = $conn->query($sql_users);
 $result_orders = $conn->query($sql_orders);
 $result_revenue = $conn->query($sql_revenue);
 
-// $total_products = $result_products->fetch_assoc()['total'];
-// $total_users = $result_users->fetch_assoc()['total'];
-// $total_orders = $result_orders->fetch_assoc()['total'];
-// $total_revenue = $result_revenue->fetch_assoc()['total'];
+// Khởi tạo các biến với giá trị mặc định
+$total_products = 0;
+$total_users = 0;
+$total_orders = 0;
+$total_revenue = 0;
+
+// Gán giá trị từ kết quả truy vấn
+if ($result_products && $row = $result_products->fetch_assoc()) {
+    $total_products = $row['total'];
+}
+
+if ($result_users && $row = $result_users->fetch_assoc()) {
+    $total_users = $row['total'];
+}
+
+if ($result_orders && $row = $result_orders->fetch_assoc()) {
+    $total_orders = $row['total'];
+}
+
+if ($result_revenue && $row = $result_revenue->fetch_assoc()) {
+    $total_revenue = $row['total'] ?? 0; // Sử dụng null coalescing operator
+}
 
 $conn->close();
 ?>
@@ -142,10 +160,10 @@ $conn->close();
         <div class="sidebar">
             <h2>Admin Panel</h2>
             <ul>
-                <li><a href="#"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="homepage.php"><i class="fas fa-home"></i> Trang Chủ</a></li>
                 <li><a href="quanlysanpham.php"><i class="fas fa-box"></i> Sản phẩm</a></li>
                 <li><a href="#"><i class="fas fa-users"></i> Người dùng</a></li>
-                <li><a href="#"><i class="fas fa-shopping-cart"></i> Đơn hàng</a></li>
+                <li><a href="quanlydonhang.php"><i class="fas fa-shopping-cart"></i> Đơn hàng</a></li>
                 <li><a href="#"><i class="fas fa-cog"></i> Cài đặt</a></li>
                 <li><a href="dangxuat.php">Đăng xuất</a></li>
             </ul>
@@ -154,25 +172,25 @@ $conn->close();
             <header>
                 <h1>Xin chào, Admin</h1>
                 <div class="user-info">
-                    
+
                 </div>
             </header>
             <main>
                 <div class="card">
                     <h3>Tổng số sản phẩm</h3>
-                    <p><?php echo $total_products; ?></p>
+                    <p><?php echo number_format($total_products); ?></p>
                 </div>
                 <div class="card">
                     <h3>Tổng số người dùng</h3>
-                    <p><?php echo $total_users; ?></p>
+                    <p><?php echo number_format($total_users); ?></p>
                 </div>
                 <div class="card">
                     <h3>Tổng số đơn hàng</h3>
-                    <p><?php echo $total_orders; ?></p>
+                    <p><?php echo number_format($total_orders); ?></p>
                 </div>
                 <div class="card">
                     <h3>Tổng doanh thu</h3>
-                    <p><?php echo number_format($total_revenue, 0, ',', '.') . ' VNĐ'; ?></p>
+                    <p><?php echo number_format($total_revenue, 0, ',', '.'); ?> VNĐ</p>
                 </div>
             </main>
         </div>
