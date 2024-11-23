@@ -8,98 +8,51 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] != 3) {
     exit();
 }
 
-// // Xử lý thêm sản phẩm
-// // Xử lý thêm sản phẩm
-// if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_product'])) {
-//     // Lấy dữ liệu từ form
-//     $ten_san_pham = $_POST['ten_san_pham'];
-//     $gia = $_POST['gia'];
-//     $mo_ta = $_POST['mo_ta'];
-//     $so_luong = $_POST['so_luong'];
-//     $hang_id = $_POST['hang_id'];
-//     $cpu = $_POST['cpu'];
-//     $ram = $_POST['ram'];
-//     $o_cung = $_POST['o_cung'];
-//     $gpu = $_POST['gpu'];
-//     $kich_thuoc_manh_hinh = $_POST['kich_thuoc_manh_hinh'];
-//     $thong_tin_mang_hinh = $_POST['thong_tin_mang_hinh'];
-//     $pin = $_POST['pin'];
-//     $he_dieu_hanh = $_POST['he_dieu_hanh'];
-//     $trong_luong = $_POST['trong_luong'];
+// Xử lý cập nhật trạng thái sản phẩm
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_status'])) {
+    $product_id = intval($_POST['product_id']);
+    $new_status = $_POST['new_status'];
 
-//     // Thêm sản phẩm vào bảng sanpham
-//     $sql = "INSERT INTO sanpham (ten_san_pham, gia, mo_ta, so_luong, hang_id, cpu, ram, o_cung, gpu, kich_thuoc_manh_hinh, thong_tin_mang_hinh, pin, he_dieu_hanh, trong_luong) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-//     $stmt = $conn->prepare($sql);
-//     $stmt->bind_param("sdsiisssssssss", $ten_san_pham, $gia, $mo_ta, $so_luong, $hang_id, $cpu, $ram, $o_cung, $gpu, $kich_thuoc_manh_hinh, $thong_tin_mang_hinh, $pin, $he_dieu_hanh, $trong_luong);
-
-//     if ($stmt->execute()) {
-//         $sanpham_id = $stmt->insert_id;
-
-//         // Xử lý upload nhiều ảnh
-//         if (isset($_FILES['images']) && !empty($_FILES['images']['name'][0])) {
-//             $upload_dir = "uploads/";
-//             $allowed_types = array('jpg', 'jpeg', 'png', 'gif');
-//             $max_file_size = 5 * 1024 * 1024; // 5MB
-
-//             foreach ($_FILES['images']['tmp_name'] as $key => $tmp_name) {
-//                 $file_name = $_FILES['images']['name'][$key];
-//                 $file_size = $_FILES['images']['size'][$key];
-//                 $file_tmp = $_FILES['images']['tmp_name'][$key];
-//                 $file_type = $_FILES['images']['type'][$key];
-
-//                 // Kiểm tra loại file và kích thước
-//                 $file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
-//                 if (!in_array($file_ext, $allowed_types)) {
-//                     $error_message = "Chỉ cho phép các file ảnh JPG, JPEG, PNG và GIF.";
-//                     continue;
-//                 }
-//                 if ($file_size > $max_file_size) {
-//                     $error_message = "File không được vượt quá 5MB.";
-//                     continue;
-//                 }
-
-//                 // Tạo tên file mới để tránh trùng lặp
-//                 $new_file_name = uniqid() . '.' . $file_ext;
-
-//                 // Di chuyển file tạm vào thư mục uploads
-//                 move_uploaded_file($file_tmp, $upload_dir . $new_file_name);
-
-//                 // Thêm ảnh vào bảng anh_sanpham
-//                 $sql = "INSERT INTO anh_sanpham (sanpham_id, anh) VALUES (?, ?)";
-//                 $stmt = $conn->prepare($sql);
-//                 $stmt->bind_param("is", $sanpham_id, $new_file_name);
-//                 $stmt->execute();
-//             }
-//         }
-//     }
-// }
-
-// Xử lý xóa sản phẩm
-if (isset($_GET['delete'])) {
-    $id = $_GET['delete'];
-    $sql = "DELETE FROM sanpham WHERE id = ?";
+    $sql = "UPDATE sanpham SET trang_thai = ? WHERE id = ?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $id);
+    $stmt->bind_param("si", $new_status, $product_id);
 
     if ($stmt->execute()) {
-        $success_message = "Sản phẩm đã được xóa thành công.";
+        $success_message = "Cập nhật trạng thái sản phẩm thành công.";
     } else {
-        $error_message = "Có lỗi xảy ra khi xóa sản phẩm.";
+        $error_message = "Có lỗi xảy ra: " . $stmt->error;
     }
 }
 
 // Lấy danh sách sản phẩm
-$sql = "SELECT s.*, l.ten_hang FROM sanpham s LEFT JOIN hang l ON s.hang_id = l.id";
+$sql = "SELECT sanpham.id, sanpham.ten_san_pham, sanpham.gia, sanpham.so_luong, sanpham.trang_thai, hang.ten_hang 
+        FROM sanpham 
+        LEFT JOIN hang ON sanpham.hang_id = hang.id 
+        ORDER BY sanpham.id ASC";
 $result = $conn->query($sql);
 
-// Lấy danh sách loại sản phẩm
+// Lấy danh sách hãng để hiển thị trong dropdown
 $sql_hang = "SELECT * FROM hang";
 $result_hang = $conn->query($sql_hang);
 
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+// Xử lý lọc theo hãng
+$hang_id = isset($_GET['hang_id']) ? intval($_GET['hang_id']) : 0;
+
+// Lấy danh sách sản phẩm
+$sql1 = "SELECT sanpham.id, sanpham.ten_san_pham, sanpham.gia, sanpham.so_luong, hang.ten_hang 
+        FROM sanpham 
+        LEFT JOIN hang ON sanpham.hang_id = hang.id";
+
+// Nếu có hãng được chọn, thêm điều kiện vào truy vấn
+if ($hang_id > 0) {
+    $sql1 .= " WHERE sanpham.hang_id = $hang_id";
+}
+
+$sql1 .= " ORDER BY sanpham.id ASC"; // Sắp xếp theo ID
+$result = $conn->query($sql1);
 ?>
+
+
 
 <!DOCTYPE html>
 <html lang="vi">
@@ -112,12 +65,42 @@ error_reporting(E_ALL);
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
         .container {
-            margin-top: 50px;
+            margin-top: 20px;
+        }
+
+        .card {
+            margin-bottom: 20px;
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .product-name {
+            max-width: 150px;
+            /* Chiều rộng tối đa cho tên sản phẩm */
+            overflow: hidden;
+            /* Ẩn phần thừa */
+            white-space: nowrap;
+            /* Ngăn không cho xuống dòng */
+            text-overflow: ellipsis;
+            /* Hiển thị dấu ba chấm khi tên quá dài */
         }
     </style>
 </head>
 
 <body>
+    <?php
+    if (isset($success_message)) {
+        echo "<div class='alert alert-success'>{$success_message}</div>";
+    }
+    if (isset($error_message)) {
+        echo "<div class='alert alert-danger'>{$error_message}</div>";
+    }
+    ?>
+
     <div class="container">
         <h2 class="mb-4">Quản lý sản phẩm</h2>
         <a href="admin_dashboard.php" class="btn btn-secondary mb-3">
@@ -127,23 +110,30 @@ error_reporting(E_ALL);
             <i class="fas fa-plus"></i> Thêm sản phẩm
         </button>
 
-        <?php
-        if (isset($success_message)) {
-            echo "<div class='alert alert-success'>{$success_message}</div>";
-        }
-        if (isset($error_message)) {
-            echo "<div class='alert alert-danger'>{$error_message}</div>";
-        }
-        ?>
+        <form method="GET" class="mb-3">
+            <label for="hang_id">Chọn hãng:</label>
+            <select name="hang_id" id="hang_id" class="form-control" onchange="this.form.submit()">
+                <option value="0">Tất cả</option>
+                <?php while ($row_hang = $result_hang->fetch_assoc()): ?>
+                    <option value="<?php echo $row_hang['id']; ?>" <?php echo ($hang_id == $row_hang['id']) ? 'selected' : ''; ?>>
+                        <?php echo $row_hang['ten_hang']; ?>
+                    </option>
+                <?php endwhile; ?>
+            </select>
+        </form>
+
+
+
 
         <table class="table table-striped">
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Tên sản phẩm</th>
-                    <th>Hãng</th>
+                    <th><a href="?sort=ten_san_pham">Tên sản phẩm</a></th>
+                    <th><a href="?sort=ten_hang">Hãng</a></th>
                     <th>Giá</th>
-                    <th>Số lượng tồn kho</th>
+                    <th>Số lượng</th>
+                    <th>Trạng thái</th>
                     <th>Thao tác</th>
                 </tr>
             </thead>
@@ -153,17 +143,26 @@ error_reporting(E_ALL);
                     while ($row = $result->fetch_assoc()) {
                         echo "<tr>";
                         echo "<td>" . $row["id"] . "</td>";
-                        echo "<td>" . $row["ten_san_pham"] . "</td>";
+                        echo "<td class='product-name'>" . htmlspecialchars($row["ten_san_pham"]) . "</td>";
                         echo "<td>" . $row["ten_hang"] . "</td>";
                         echo "<td>" . number_format($row["gia"], 0, ',', '.') . " VNĐ</td>";
                         echo "<td>" . $row["so_luong"] . "</td>";
+                        echo "<td>";
+                        echo "<form method='POST' style='display: inline;'>";
+                        echo "<input type='hidden' name='product_id' value='" . $row['id'] . "'>";
+                        echo "<select name='new_status' class='form-control status-select' onchange='this.form.submit()'>";
+                        echo "<option value='active' " . ($row['trang_thai'] == 'active' ? 'selected' : '') . ">Còn hàng</option>";
+                        echo "<option value='inactive' " . ($row['trang_thai'] == 'inactive' ? 'selected' : '') . ">Ngừng bán</option>";
+                        echo "<option value='out_of_stock' " . ($row['trang_thai'] == 'out_of_stock' ? 'selected' : '') . ">Hết hàng</option>";
+                        echo "</select>";
+                        echo "<input type='hidden' name='update_status' value='1'>";
+                        echo "</form>";
+                        echo "</td>";
                         echo "<td>
                                 <button class='btn btn-sm btn-warning edit-btn' data-id='" . $row["id"] . "'>
                                     <i class='fas fa-edit'></i> Sửa
                                 </button>
-                                <button class='btn btn-sm btn-danger delete-btn' data-id='" . $row["id"] . "'>
-                                    <i class='fas fa-trash'></i> Xóa
-                                </button>
+                                
                               </td>";
                         echo "</tr>";
                     }

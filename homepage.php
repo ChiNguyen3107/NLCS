@@ -8,9 +8,13 @@ $sql = "SELECT sanpham.id, sanpham.ten_san_pham, sanpham.gia, anh_sanpham.anh
         FROM sanpham 
         LEFT JOIN anh_sanpham 
         ON sanpham.id = anh_sanpham.sanpham_id 
-        WHERE anh_sanpham.is_main = 1"; // Chỉ lấy ảnh đại diện
+        WHERE anh_sanpham.is_main = 1 AND sanpham.trang_thai = 'active'"; 
 
 $result = $conn->query($sql);
+$search_query = '';
+if (isset($_GET['search'])) {
+    $search_query = htmlspecialchars($_GET['search']); // Bảo mật đầu vào
+}
 ?>
 <html>
 
@@ -33,8 +37,11 @@ $result = $conn->query($sql);
                 </div>
             </div>
             <div class="search-bar">
-                <input placeholder="Tìm kiếm sản phẩm..." type="text" />
-                <button> Tìm kiếm </button>
+                <form method="GET" action="">
+                    <input placeholder="Tìm kiếm sản phẩm..." type="text" name="search"
+                        value="<?php echo htmlspecialchars($search_query); ?>" />
+                    <button type="submit">Tìm kiếm</button>
+                </form>
             </div>
             <div class="contact-info">
                 <div>
@@ -90,7 +97,7 @@ $result = $conn->query($sql);
     <div class="navbar">
         <div class="navbar-container">
             <div class="nav-links">
-                <a href="#"> Trang Chủ </a>
+                <a href="homepage.php">Trang Chủ</a>
                 <a href="#"> Laptop mới </a>
                 <a href="#"> Laptop like new </a>
                 <a href="#"> Bảo hành </a>
@@ -144,10 +151,12 @@ $result = $conn->query($sql);
                 </select>
                 <select id="cpu" name="cpu">
                     <option value="all">CPU</option>
-                    <option value="intel-i3">Intel Core i3</option>
-                    <option value="intel-i5">Intel Core i5</option>
-                    <option value="intel-i7">Intel Core i7</option>
-                    <option value="amd-ryzen">AMD Ryzen</option>
+                    <option value="intel-i3">Core i3</option>
+                    <option value="intel-i5">Core i5</option>
+                    <option value="intel-i7">Core i7</option>
+                    <option value="amd-ryzen">Ryzen 3</option>
+                    <option value="amd-ryzen">Ryzen 5</option>
+                    <option value="amd-ryzen">Ryzen 7</option>
                 </select>
                 <select id="ram" name="ram">
                     <option value="all">RAM</option>
@@ -158,10 +167,10 @@ $result = $conn->query($sql);
                 </select>
                 <select id="storage" name="storage">
                     <option value="all">Ổ cứng</option>
-                    <option value="ssd-256gb">SSD 256GB</option>
-                    <option value="ssd-512gb">SSD 512GB</option>
-                    <option value="ssd-1tb">SSD 1TB</option>
-                    <option value="hdd-1tb">HDD 1TB</option>
+                    <option value="ssd-256gb">256GB</option>
+                    <option value="ssd-512gb">512GB</option>
+                    <option value="ssd-1tb">1TB</option>
+
                 </select>
                 <button id="apply-filter" class="apply-filter-btn">Lọc</button>
                 <button id="reset-filter" class="reset-filter-btn">Đặt lại</button>
@@ -171,29 +180,21 @@ $result = $conn->query($sql);
     <div class="container">
         <div class="product-list">
             <?php
-            if ($result->num_rows > 0) {
+            if (isset($result) && $result->num_rows > 0) {
                 while ($row = $result->fetch_assoc()) {
                     echo '<div class="product-item">';
-
-                    // Hiển thị ảnh sản phẩm (ảnh đại diện)
                     echo '<div class="product-image">';
-                    echo '<img alt="Ảnh sản phẩm ' . htmlspecialchars($row["ten_san_pham"]) . '" src="uploads/' . htmlspecialchars($row["anh"]) . '" />';
+                    echo '<img src="uploads/' . htmlspecialchars($row["anh"]) . '" alt="' . htmlspecialchars($row["ten_san_pham"]) . '">';
                     echo '</div>';
-
-                    // Thông tin sản phẩm
                     echo '<div class="product-info">';
-
-                    // Tên sản phẩm (hiển thị đầy đủ)
                     echo '<h3 class="product-name">' . htmlspecialchars($row["ten_san_pham"]) . '</h3>';
-
-                    // Giá sản phẩm
-                    echo '<div class="price">' . number_format($row["gia"], 0, ',', '.') . ' VND</div>';
+                    echo '<div class="price">' . number_format($row["gia"], 0, ',', '.') . ' VNĐ</div>';
                     echo '<a href="chitiet_sanpham.php?id=' . $row['id'] . '">Xem chi tiết</a>';
                     echo '</div>';
                     echo '</div>';
                 }
-            } else {
-                echo "Không có sản phẩm nào.";
+            } elseif (isset($search_query) && $search_query != '') {
+                echo '<p>Không tìm thấy sản phẩm nào khớp với từ khóa: <strong>' . htmlspecialchars($search_query) . '</strong></p>';
             }
             ?>
         </div>
@@ -285,6 +286,29 @@ $result = $conn->query($sql);
                     }
                 });
             }
+        });
+
+        $(document).ready(function () {
+            $('form').submit(function (e) {
+                e.preventDefault();
+                var searchQuery = $('input[name="search"]').val();
+
+                // Hiển thị thông báo đang tìm kiếm
+                $('.product-list').html('<p>Đang tìm kiếm...</p>');
+
+                $.ajax({
+                    url: 'search.php',
+                    type: 'GET',
+                    data: { search: searchQuery },
+                    success: function (response) {
+                        $('.product-list').html(response);
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Có lỗi xảy ra: ' + error);
+                        $('.product-list').html('<p>Có lỗi xảy ra. Vui lòng thử lại.</p>');
+                    }
+                });
+            });
         });
     </script>
 </body>

@@ -356,61 +356,72 @@ body {
     border: 1px solid #ccc;
 }
 
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-}
-
-h2 {
-    text-align: center;
-    margin-bottom: 20px;
-    font-size: 2rem;
-    font-weight: 700;
-}
-
+/* Product list styling */
 .product-list {
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
     justify-content: center;
+    padding: 20px;
 }
 
+/* Product item styling */
 .product-item {
     background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
     overflow: hidden;
-    width: 300px;
+    width: 280px;
     text-align: center;
-    transition: transform 0.3s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .product-item:hover {
     transform: translateY(-10px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }
 
+/* Image styling */
 .product-image img {
     width: 100%;
     height: auto;
     object-fit: cover;
+    transition: opacity 0.3s ease;
 }
 
+.product-item:hover .product-image img {
+    opacity: 0.95;
+}
+
+/* Product info styling */
 .product-info {
-    padding: 15px;
+    padding: 20px 15px;
+    background-color: #f9f9f9;
+    border-top: 1px solid #eee;
 }
 
+/* Product name styling */
 .product-name {
     font-size: 1.2rem;
     font-weight: 600;
     color: #333;
     margin-bottom: 10px;
     overflow-wrap: break-word;
-    /* Đảm bảo tên sản phẩm không bị tràn */
 }
 
+.product-item a {
+    display: inline-block;
+    background-color: #4CAF50;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+/* Price styling */
 .price {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     font-weight: 700;
     color: #E53935;
 }
@@ -418,10 +429,16 @@ h2 {
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .product-list {
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        /* Giảm kích thước cho màn hình nhỏ */
+        gap: 15px;
+        padding: 15px;
+    }
+
+    .product-item {
+        width: 100%;
+        max-width: 320px;
     }
 }
+
 
 .footer {
     background-color: #333;
